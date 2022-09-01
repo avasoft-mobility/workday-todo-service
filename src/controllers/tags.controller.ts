@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { Rollbar } from "../helpers/Rollbar";
-import { getTags, getTagById, createTag } from "../services/tags.service";
+import { getTags, getTagById, createTag, deleteTagById } from "../services/tags.service";
 const router = express.Router();
 
 router.post("/", async (req: Request, res: Response) => {
@@ -55,6 +55,21 @@ router.get("/:tagId", async (req: Request, res: Response) => {
         .json({ message: response.message, body: response.body });
     }
     return res.status(response.code).json({ message: response.message });
+  } catch (error) {
+    Rollbar.error(error as unknown as Error, req);
+    res.status(500).json({ message: error });
+  }
+});
+
+router.delete("/:tagId/users/:userId", async (req: Request, res: Response) => {
+  const tagId = req.params.tagId;
+  const userId = req.params.userId;
+
+  try {
+    const response = await deleteTagById(tagId, userId);
+    return res
+      .status(response.code)
+      .json({ message: response.message, body: response.body });
   } catch (error) {
     Rollbar.error(error as unknown as Error, req);
     res.status(500).json({ message: error });
