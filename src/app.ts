@@ -2,6 +2,7 @@ import { json } from "body-parser";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import { commonTagsController } from "./controllers/commonTags.controller";
+import serverless from "serverless-http";
 
 var cors = require("cors");
 
@@ -15,8 +16,12 @@ app.get("/", (req: Request, res: Response) => {
   return res.send("Todo service is healthy!");
 });
 
+app.get("/todos/check", (req, res) => {
+  return res.send("Todo service is working fine");
+});
+
 app.use(
-  "/api/private/common-tags",
+  "/todos/private/common-tags",
   (req: Request, res: Response, next: NextFunction) => {
     if (req.headers.key === "CF43D31C5DCD2094D72EAC3B257D5949") {
       return next();
@@ -31,7 +36,11 @@ mongoose.connect(process.env.DB_STRING!.toString(), () => {
   console.log("Connected to DB");
 });
 
-const PORT = process.env.PORT || 9999;
-app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
-});
+if (process.env.LAMBDA !== "TRUE") {
+  const PORT = process.env.PORT || 9999;
+  app.listen(PORT, () => {
+    console.log(`Server is listening on port ${PORT}`);
+  });
+}
+
+module.exports.lambdaHandler = serverless(app);
