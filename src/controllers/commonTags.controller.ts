@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import { Rollbar } from "../helpers/Rollbar";
 import {
   createCommonTag,
   deleteCommonTag,
@@ -14,6 +15,7 @@ router.get("/", async (req: Request, res: Response) => {
       .status(response.code)
       .json({ message: response.message, body: response.body });
   } catch (error: any) {
+    Rollbar.error(error as unknown as Error, req);
     res.status(500).json({ message: error.message });
   }
 });
@@ -27,6 +29,7 @@ router.get("/:tagId", async (req: Request, res: Response) => {
       .status(response.code)
       .json({ message: response.message, body: response.body });
   } catch (error: any) {
+    Rollbar.error(error as unknown as Error, req);
     res.status(500).json({ message: error.message });
   }
 });
@@ -40,6 +43,7 @@ router.post("/", async (req: Request, res: Response) => {
       .status(response.code)
       .json({ message: response.message, body: response.body });
   } catch (error: any) {
+    Rollbar.error(error as unknown as Error, req);
     res.status(500).json({ message: error.message });
   }
 });
@@ -54,6 +58,7 @@ router.put("/:tagId", async (req: Request, res: Response) => {
       .status(response.code)
       .json({ message: response.message, body: response.body });
   } catch (error: any) {
+    Rollbar.error(error as unknown as Error, req);
     res.status(500).json({ message: error.message });
   }
 });
@@ -67,6 +72,7 @@ router.delete("/:tagId", async (req: Request, res: Response) => {
       .status(response.code)
       .json({ message: response.message, body: response.body });
   } catch (error: any) {
+    Rollbar.error(error as unknown as Error, req);
     res.status(500).json({ message: error.message });
   }
 });
