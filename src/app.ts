@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { commonTagsController } from "./controllers/commonTags.controller";
 import serverless from "serverless-http";
 import runMiddleware from "run-middleware";
+import { TagsController } from "./controllers/tags.controller";
 
 var cors = require("cors");
 
@@ -64,6 +65,8 @@ app.use(
   },
   commonTagsController
 );
+
+app.use("/tags", TagsController);
 
 mongoose.connect(process.env.DB_STRING!.toString(), () => {
   console.log("Connected to DB");
