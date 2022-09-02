@@ -110,7 +110,22 @@ const getTodosByMonth = async (
       ],
     },
   };
-  const queryResult = await todos.find(monthQuery);
+  let queryResult = await todos.find(monthQuery);
+
+  const firstDateTodos = await todos.find({
+    microsoftUserId: userId,
+    date: new Date(parseInt(year), parseInt(month), 1),
+  });
+  queryResult = queryResult.concat(firstDateTodos);
+
+  const lastDate = new Date(parseInt(year), parseInt(month) + 1, 1, 0);
+  queryResult = queryResult.filter((todo) => {
+    return (
+      new Date(todo.date.setHours(0, 0, 0, 0)).toDateString() !==
+      new Date(lastDate.setHours(0, 0, 0, 0)).toDateString()
+    );
+  });
+
   if (!queryResult.length) {
     return { code: 200, body: [] };
   }
