@@ -61,7 +61,7 @@ router.get("/:tagId", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/:tagId/users/:userId", async (req: Request, res: Response) => {
+router.delete("/:tagId", async (req: Request, res: Response) => {
   try {
     const tagId = req.params.tagId;
     const userId = req.query["userId"] as string;

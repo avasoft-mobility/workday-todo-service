@@ -125,17 +125,20 @@ const deleteTagById = async (
       { microsoftUserId: `${userId}` },
     ],
   });
-  if (tag.length > 0) {
-    const resposne = await tags.findByIdAndDelete({
-      _id: new mongoose.Types.ObjectId(tagId.toString()),
-    });
-    if (resposne) {
-      return { code: 200, message: "Deleted successfully", body: resposne };
-    }
-    return { code: 404, message: "No tag found to delete" };
+
+  if (tag.length === 0) {
+    return { code: 404, message: "TagId and Microsoft UserId is not matching" };
   }
 
-  return { code: 404, message: "TagId and Microsoft UserId is not matching" };
+  const resposne = await tags.findByIdAndDelete({
+    _id: new mongoose.Types.ObjectId(tagId.toString()),
+  });
+
+  if (!resposne) {
+    return { code: 404, message: "No tag found to delete" };
+  }
+  
+  return { code: 200, message: "Deleted successfully", body: resposne };
 };
 
 export { getTags, getTagById, createTag, deleteTagById };
