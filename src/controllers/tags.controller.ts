@@ -62,10 +62,9 @@ router.get("/:tagId", async (req: Request, res: Response) => {
 });
 
 router.delete("/:tagId/users/:userId", async (req: Request, res: Response) => {
-  const tagId = req.params.tagId;
-  const userId = req.params.userId;
-
   try {
+    const tagId = req.params.tagId;
+    const userId = req.query["userId"] as string;
     const response = await deleteTagById(tagId, userId);
     return res
       .status(response.code)

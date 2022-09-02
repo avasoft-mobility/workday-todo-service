@@ -28,7 +28,7 @@ app.use(
   commonTagsController
 );
 
-app.use("/todos/tags", TagsController);
+app.use("/tags", TagsController);
 
 mongoose.connect(process.env.DB_STRING!.toString(), () => {
   console.log("Connected to DB");
