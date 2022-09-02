@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import Todo from "../models/todo.model";
 
-const todo = new mongoose.Schema({
+const todos = new mongoose.Schema({
   microsoftUserId: {
     type: String,
     required: true,
@@ -43,4 +43,4 @@ const todo = new mongoose.Schema({
   ],
 });
 
-export default mongoose.model<Todo>("todos", todo);
+export default mongoose.model<Todo>("todos", todos);
