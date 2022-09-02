@@ -1,6 +1,13 @@
+import { isValidObjectId } from "mongoose";
+
 import processUTCDateConversion from "../helpers/Utilities";
-import Todo from "../models/todo.model";
+import Cipherer from "../helpers/Cipherer";
+
 import todos from "../schemas/todos.schema";
+import tags from "../schemas/tags.schema";
+
+import Todo from "../models/todo.model";
+import TodoCreateRequest from "../models/todoCreateRequest.model";
 
 interface TodoResponse {
   code: number;
@@ -130,4 +137,111 @@ const getTodosByMultipleDates = async (
   return { code: 200, message: "Successfull", body: response };
 };
 
-export { getTodos };
+const createTodo = async (
+  userId: string,
+  body: TodoCreateRequest,
+  date: string
+): Promise<TodoResponse> => {
+  if (!userId) {
+    return { code: 400, message: "User Id is required" };
+  }
+
+  if (!date && !(body.recurringDates.length > 0)) {
+    return { code: 400, message: "Todo date is required" };
+  }
+
+  if (!body.title) {
+    return { code: 400, message: "Todo title is required" };
+  }
+
+  if (!body.status) {
+    return { code: 400, message: "Todo status is required" };
+  }
+
+  if (!body.eta) {
+    return { code: 400, message: "Todo eta is required" };
+  }
+
+  if (body.eta < 0.25) {
+    return { code: 400, message: "Todo eta should be greater than 0.25" };
+  }
+
+  if (body.tags) {
+    for (let tagId of body.tags) {
+      if (!isValidObjectId(tagId)) {
+        return { code: 400, message: "Tag Id is invalid" };
+      }
+
+      const currentTag = await tags.findById(tagId);
+      if (!currentTag) {
+        return {
+          code: 404,
+          message: `Tag not found for the given this ${tagId} Tag Id`,
+        };
+      }
+    }
+  }
+
+  if (body.recurringDates.length > 0) {
+    const recurringTodos = await createRecurringTodos(userId, body);
+    return recurringTodos;
+  }
+
+  const todo = createTodoByDate(userId, body, date);
+  return todo;
+};
+
+const createRecurringTodos = async (
+  userId: string,
+  body: TodoCreateRequest
+): Promise<TodoResponse> => {
+  const results = [];
+
+  let dates = body.recurringDates.map((date) => {
+    return processUTCDateConversion(date);
+  });
+
+  for (let date of dates) {
+    let item = {
+      title: Cipherer.encrypt(body.title),
+      comments: body.comments ? Cipherer.encrypt(body.comments) : undefined,
+      status: body.status,
+      type: body.type,
+      eta: body.eta,
+      tags: body.tags,
+      microsoftUserId: userId,
+      ata: 0,
+      date: date,
+    };
+
+    let result = await todos.create(item);
+    results.push(result);
+  }
+
+  return { code: 200, message: "success", body: results };
+};
+
+const createTodoByDate = async (
+  userId: string,
+  body: TodoCreateRequest,
+  date: string
+): Promise<TodoResponse> => {
+  const processedDate = processUTCDateConversion(date);
+
+  let item = {
+    title: Cipherer.encrypt(body.title),
+    comments: body.comments ? Cipherer.encrypt(body.comments) : undefined,
+    status: body.status,
+    type: body.type,
+    eta: body.eta,
+    ata: 0,
+    tags: body.tags,
+    microsoftUserId: userId,
+    date: processedDate,
+  };
+
+  let response = await todos.create(item);
+  return { code: 200, message: "successful", body: response };
+};
+
+export { getTodos, createTodo };

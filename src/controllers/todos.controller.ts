@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { Rollbar } from "../helpers/Rollbar";
-import { getTodos } from "../services/todos.service";
+import { createTodo, getTodos } from "../services/todos.service";
 const router = express.Router();
 
 router.get("/", async (req: Request, res: Response) => {
@@ -20,6 +20,27 @@ router.get("/", async (req: Request, res: Response) => {
       startDate as string,
       endDate as string
     );
+
+    if (response.code === 200) {
+      return res
+        .status(response.code)
+        .json({ message: response.message, body: response.body });
+    }
+
+    return res.status(response.code).json({ message: response.message });
+  } catch (error) {
+    Rollbar.error(error as unknown as Error, req);
+    res.status(500).json({ message: (error as unknown as Error).message });
+  }
+});
+
+router.post("/", async (req: Request, res: Response) => {
+  try {
+    const userId = req.query.userId;
+    const body = req.body;
+    const date = req.query.date;
+
+    const response = await createTodo(userId as string, body, date as string);
 
     if (response.code === 200) {
       return res
