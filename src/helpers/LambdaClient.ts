@@ -42,26 +42,26 @@ class LambdaClient {
 
   private getFunctionName = (service: Services): string => {
     if (service === "Mobile") {
-      return `AVA-HIVE-NP-WORKDAY-MOBILE-BE-dev-app`;
+      return `MobileFunction`;
     }
 
     if (service === "Attendance") {
-      return `AVA-HIVE-NP-WORKDAY-ATTENDANCE-BE-dev-app`;
+      return `AttendancesFunction`;
     }
 
     if (service === "Reports") {
-      return `AVA-HIVE-NP-WORKDAY-REPORTS-BE-dev-app`;
+      return `ReportsFunction`;
     }
 
     if (service === "Todos") {
-      return `AVA-HIVE-NP-WORKDAY-TODOS-BE-dev-app`;
+      return `TodosFunction`;
     }
 
     if (service === "Users") {
-      return `AVA-HIVE-NP-WORKDAY-USERS-BE-dev-app`;
+      return `UsersFunction`;
     }
 
-    return `AVA-HIVE-NP-WORKDAY-TODOS-BE-dev-app`;
+    return `TodosFunction`;
   };
 
   get = (route: string, queryParams?: Object) => {
@@ -72,12 +72,13 @@ class LambdaClient {
       queryParams: queryParams ? queryParams : {},
       isBase64Encoded: false,
     };
-    return this.lambda
+    const response = this.lambda
       .invoke({
         Payload: JSON.stringify(Payload),
         FunctionName: this.FunctionName,
       })
       .promise();
+    return JSON.parse(response.Payload);
   };
 
   post = (route: string, queryParams?: Object, body?: Object) => {
@@ -90,12 +91,13 @@ class LambdaClient {
       body: body ? body : {},
     };
 
-    return this.lambda
+    const response = this.lambda
       .invoke({
         Payload: JSON.stringify(Payload),
         FunctionName: this.FunctionName,
       })
       .promise();
+    return JSON.parse(response.Payload);
   };
 
   put = (route: string, queryParams?: Object, body?: Object) => {
@@ -108,12 +110,13 @@ class LambdaClient {
       body: body ? body : {},
     };
 
-    return this.lambda
+    const response = this.lambda
       .invoke({
         Payload: JSON.stringify(Payload),
         FunctionName: this.FunctionName,
       })
       .promise();
+    return JSON.parse(response.Payload);
   };
 
   delete = (route: string, queryParams?: Object, body?: Object) => {
@@ -126,12 +129,13 @@ class LambdaClient {
       body: body ? body : {},
     };
 
-    return this.lambda
+    const response = this.lambda
       .invoke({
         Payload: JSON.stringify(Payload),
         FunctionName: this.FunctionName,
       })
       .promise();
+    return JSON.parse(response.Payload);
   };
 }
 
