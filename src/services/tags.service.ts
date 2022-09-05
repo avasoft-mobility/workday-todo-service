@@ -44,18 +44,14 @@ const getTagsByUserId = async (userId: string): Promise<TagResponse> => {
   let queryResult: Tag[] = [];
   let AllTeamTags : Tag[] = [];
   var commontags = await tags.find({ microsoftUserId: { $exists: false } });
-  ManagerID.map(async manager =>
-    {
+ 
       var Teamtags = await tags.find({
-        $and: [{ microsoftUserId: { $eq: manager } }, { type: { $eq: "team" } }],
+        $and: [{ microsoftUserId: { $in: ManagerID } }, { type: { $eq: "team" } }],
       });
-      AllTeamTags = [...Teamtags];
-    })
-  
-
+console.log(Teamtags);
   var UserTags = await tags.find({ microsoftUserId: { $eq: userId } });
 
-  queryResult = [...commontags, ...AllTeamTags, ...UserTags];
+  queryResult = [...commontags, ...Teamtags, ...UserTags];
   return queryResult.length === 0
     ? { code: 404, message: "No tags found" }
     : { message: "successful", code: 200, body: queryResult };
