@@ -42,26 +42,26 @@ class LambdaClient {
 
   private getFunctionName = (service: Services): string => {
     if (service === "Mobile") {
-      return `MobileFunction`;
+      return `AVA-HIVE-NP-WORKDAY-MOBILE-BE-dev-app`;
     }
 
     if (service === "Attendance") {
-      return `AttendancesFunction`;
+      return `AVA-HIVE-NP-WORKDAY-ATTENDANCE-BE-dev-app`;
     }
 
     if (service === "Reports") {
-      return `ReportsFunction`;
+      return `AVA-HIVE-NP-WORKDAY-REPORTS-BE-dev-app`;
     }
 
     if (service === "Todos") {
-      return `TodosFunction`;
+      return `AVA-HIVE-NP-WORKDAY-TODOS-BE-dev-app`;
     }
 
     if (service === "Users") {
-      return `UsersFunction`;
+      return `AVA-HIVE-NP-WORKDAY-USERS-BE-dev-app`;
     }
 
-    return `TodosFunction`;
+    return `AVA-HIVE-NP-WORKDAY-TODOS-BE-dev-app`;
   };
 
   get = (route: string, queryParams?: Object) => {
