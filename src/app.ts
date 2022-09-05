@@ -1,10 +1,13 @@
 import { json } from "body-parser";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
-import { commonTagsController } from "./controllers/commonTags.controller";
-import serverless from "serverless-http";
+
 import runMiddleware from "run-middleware";
+import serverless from "serverless-http";
+
+import { commonTagsController } from "./controllers/commonTags.controller";
 import { TagsController } from "./controllers/tags.controller";
+import { todosController } from "./controllers/todos.controller";
 
 var cors = require("cors");
 
@@ -67,6 +70,8 @@ app.use(
 );
 
 app.use("/tags", TagsController);
+
+app.use("/todos", todosController);
 
 mongoose.connect(process.env.DB_STRING!.toString(), () => {
   console.log("Connected to DB");

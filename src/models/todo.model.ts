@@ -11,7 +11,6 @@ interface Todo {
   ata: number;
   date: Date;
   tags?: Tag[];
-  tagNames?: string[];
   __v: number;
 }
 
