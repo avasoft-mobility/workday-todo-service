@@ -65,6 +65,49 @@ const createTag = async (
   return { code: 201, message: "Tag created successfully", data: result };
 };
 
+const updateTag = async (tagId: string, userId: string, tagname: string): Promise<TagResponse> => {
+  const user: MicrosoftUser = {
+    _id: "string",
+    userId: userId,
+    name: "String",
+    role: "String",
+    practice: "string",
+    mail: "string",
+    managerId: "d12d68ea-b04f-4bd8-9124-becae7acb9b5",
+    reportings: [userId, "string"],
+    last_access: "string",
+    __v: 0,
+    employeeId: "string",
+  };
+
+  const isTagNameExist = await isTagExist(userId, user.managerId, tagname);
+
+  if (isTagNameExist) {
+    return { code: 400, message: "Tag name already exist" };
+  }
+
+  const tag = await tags.find({
+    $and: [
+      { _id: new mongoose.Types.ObjectId(tagId) },
+      { microsoftUserId: `${userId}` },
+    ],
+  });
+
+  if (tag.length === 0) {
+    return { code: 404, message: "TagId and Microsoft UserId is not matching" };
+  }
+
+  const response = await tags.findByIdAndUpdate(tagId, {
+    tagName: tagname,
+  });
+
+  const updateTag = await tags
+    .where("_id")
+    .equals(new mongoose.Types.ObjectId(tagId));
+
+  return { body: updateTag, code: 201, message: "Updated successfully" };
+};
+
 const isTagExist = async (
   userId: string,
   managerId: string,
@@ -141,4 +184,4 @@ const deleteTagById = async (
   return { code: 200, message: "Deleted successfully", body: resposne };
 };
 
-export { getTags, getTagById, createTag, deleteTagById };
+export { getTags, getTagById, createTag, deleteTagById, updateTag };
