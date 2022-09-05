@@ -40,6 +40,13 @@ router.post("/", async (req: Request, res: Response) => {
 router.get("/", async (req: Request, res: Response) => {
   try {
     const response = await getTags();
+
+    if (response.code === 404) {
+      return res
+        .status(response.code)
+        .send({ message: response.message, body: response.body });
+    }
+
     return res.status(response.code).send({ body: response.body });
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, req);
@@ -52,10 +59,12 @@ router.get("/:tagId", async (req: Request, res: Response) => {
     const tagId = req.params.tagId;
 
     const response = await getTagById(tagId);
-    if (response.code === 200) {
-      return res.status(response.code).send({ body: response.body });
+
+    if (response.code >= 400) {
+      return res.status(response.code).send({ message: response.message });
     }
-    return res.status(response.code).send({ message: response.message });
+
+    return res.status(response.code).send({ body: response.body });
   } catch (error) {
     Rollbar.error(error as unknown as Error, req);
     res.status(500).send({ message: error });
@@ -67,6 +76,11 @@ router.delete("/:tagId", async (req: Request, res: Response) => {
     const tagId = req.params.tagId;
     const userId = req.query["userId"] as string;
     const response = await deleteTagById(tagId, userId);
+
+    if (response.code >= 400) {
+      return res.status(response.code).send({ message: response.message });
+    }
+    
     return res.status(response.code).send({ body: response.body });
   } catch (error) {
     Rollbar.error(error as unknown as Error, req);
