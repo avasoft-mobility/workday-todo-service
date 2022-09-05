@@ -30,7 +30,7 @@ router.post("/", async (req: Request, res: Response) => {
       return res.status(response.code).send({ message: response.message });
     }
 
-    return res.status(201).send({ body: response.data });
+    return res.status(201).send(response.data);
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, req);
     return res.status(500).send({ message: error.message });
@@ -45,7 +45,7 @@ router.get("/", async (req: Request, res: Response) => {
       return res.status(response.code).send({ message: response.message });
     }
 
-    return res.status(response.code).send({ body: response.body });
+    return res.status(response.code).send(response.body);
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, req);
     res.status(500).send({ message: error.message });
@@ -62,7 +62,7 @@ router.get("/:tagId", async (req: Request, res: Response) => {
       return res.status(response.code).send({ message: response.message });
     }
 
-    return res.status(response.code).send({ body: response.body });
+    return res.status(response.code).send(response.body);
   } catch (error) {
     Rollbar.error(error as unknown as Error, req);
     res.status(500).send({ message: error });
@@ -79,7 +79,7 @@ router.delete("/:tagId", async (req: Request, res: Response) => {
       return res.status(response.code).send({ message: response.message });
     }
 
-    return res.status(response.code).send({ body: response.body });
+    return res.status(response.code).send(response.body);
   } catch (error) {
     Rollbar.error(error as unknown as Error, req);
     res.status(500).send({ message: error });
@@ -110,7 +110,7 @@ router.put("/:tagId", async (req: Request, res: Response) => {
       return res.status(response.code).send({ message: response.message });
     }
 
-    return res.status(response.code).send({ body: response.body });
+    return res.status(response.code).send(response.body);
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, req);
     return res.status(500).send({ message: error.message });
