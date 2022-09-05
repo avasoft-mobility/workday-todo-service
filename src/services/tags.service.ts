@@ -104,4 +104,41 @@ const isTagExist = async (
   return false;
 };
 
-export { getTags, getTagById, createTag };
+const deleteTagById = async (
+  tagId: String,
+  userId: string
+): Promise<TagResponse> => {
+  if (!tagId) {
+    return { code: 400, message: "Tag Id is Required" };
+  }
+
+  if (!mongoose.isValidObjectId(tagId)) {
+    return { code: 400, message: "Tag Id is not valid" };
+  }
+
+  if (!userId) {
+    return { code: 400, message: "User Id is Required" };
+  }
+  const tag = await tags.find({
+    $and: [
+      { _id: new mongoose.Types.ObjectId(tagId.toString()) },
+      { microsoftUserId: `${userId}` },
+    ],
+  });
+
+  if (tag.length === 0) {
+    return { code: 404, message: "TagId and Microsoft UserId is not matching" };
+  }
+
+  const resposne = await tags.findByIdAndDelete({
+    _id: new mongoose.Types.ObjectId(tagId.toString()),
+  });
+
+  if (!resposne) {
+    return { code: 404, message: "No tag found to delete" };
+  }
+  
+  return { code: 200, message: "Deleted successfully", body: resposne };
+};
+
+export { getTags, getTagById, createTag, deleteTagById };
