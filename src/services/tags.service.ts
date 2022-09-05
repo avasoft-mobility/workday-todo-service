@@ -105,7 +105,7 @@ const updateTag = async (tagId: string, userId: string, tagname: string): Promis
     .where("_id")
     .equals(new mongoose.Types.ObjectId(tagId));
 
-  return { body: updateTag, code: 201, message: "Updated successfully" };
+  return { body: updateTag, code: 200, message: "Updated successfully" };
 };
 
 const isTagExist = async (

@@ -107,7 +107,7 @@ router.put("/:tagId", async (req: Request, res: Response) => {
     }
 
     return res
-      .status(201)
+      .status(response.code)
       .send({ message: response.message, body: response.body });
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, req);
