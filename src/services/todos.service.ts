@@ -1,10 +1,9 @@
-import { isValidObjectId } from "mongoose";
-
-import processUTCDateConversion from "../helpers/Utilities";
+import mongoose from "mongoose";
 import Cipherer from "../helpers/Cipherer";
+import processUTCDateConversion from "../helpers/Utilities";
 
-import todos from "../schemas/todos.schema";
 import tags from "../schemas/tags.schema";
+import todos from "../schemas/todos.schema";
 
 import Todo from "../models/todo.model";
 import TodoCreateRequest from "../models/todoCreateRequest.model";
@@ -66,15 +65,18 @@ const getTodosByDate = async (
   date: string
 ): Promise<TodoResponse> => {
   const processedDate = processUTCDateConversion(date);
-  const response = await todos.find({
+  const queryResult = await todos.find({
     microsoftUserId: userId,
     date: processedDate,
   });
-  if (response.length === 0) {
+
+  if (!queryResult.length) {
     return { code: 404, message: "No records found" };
   }
 
-  return { code: 200, message: "Successful", body: response };
+  const result = decrpytedData(queryResult);
+
+  return { code: 200, message: "Successful", body: result };
 };
 
 const getTodosByMonth = async (
@@ -107,12 +109,14 @@ const getTodosByMonth = async (
       ],
     },
   };
-  const response = await todos.find(monthQuery);
-  if (response.length === 0) {
+  const queryResult = await todos.find(monthQuery);
+  if (!queryResult.length) {
     return { code: 404, message: "No records found" };
   }
 
-  return { code: 200, message: "Successfull", body: response };
+  const result = decrpytedData(queryResult);
+
+  return { code: 200, message: "Successfull", body: result };
 };
 
 const getTodosByMultipleDates = async (
@@ -128,13 +132,37 @@ const getTodosByMultipleDates = async (
     date: { $gte: fromDate, $lt: toDate.setDate(toDate.getDate() + 1) },
   };
 
-  const response = await todos.find(multipleDatesQuery);
+  const queryResult = await todos.find(multipleDatesQuery);
 
-  if (response.length === 0) {
+  if (!queryResult.length) {
     return { code: 404, message: "No records found" };
   }
 
-  return { code: 200, message: "Successfull", body: response };
+  const result = decrpytedData(queryResult);
+
+  return { code: 200, message: "Successfull", body: result };
+};
+
+const decrpytedData = (queryResult: Todo[]) => {
+  queryResult.map((todo) => {
+    const decryptedTitle = Cipherer.decrypt(todo.title);
+    const decryptedComments = todo.comments
+      ? Cipherer.decrypt(todo.comments)
+      : undefined;
+
+    if (decryptedTitle.trim() === "" && decryptedComments?.trim() === "") {
+      return todo;
+    }
+
+    todo.title = decryptedTitle;
+    if (decryptedComments) {
+      todo.comments = decryptedComments;
+    }
+
+    return todo;
+  });
+
+  return queryResult;
 };
 
 const createTodo = async (
@@ -168,7 +196,7 @@ const createTodo = async (
 
   if (body.tags) {
     for (let tagId of body.tags) {
-      if (!isValidObjectId(tagId)) {
+      if (!mongoose.isValidObjectId(tagId)) {
         return { code: 400, message: "Tag Id is invalid" };
       }
 
@@ -244,4 +272,134 @@ const createTodoByDate = async (
   return { code: 200, message: "successful", body: response };
 };
 
-export { getTodos, createTodo };
+const updateTodo = async (
+  todoId: string,
+  userId: string,
+  body: TodoCreateRequest
+): Promise<TodoResponse> => {
+  if (!todoId) {
+    return { code: 400, message: "Todo Id is required" };
+  }
+
+  if (!userId) {
+    return { code: 400, message: "User Id is required" };
+  }
+
+  if (!body.title) {
+    return { code: 400, message: "Todo title is required" };
+  }
+
+  if (!body.status) {
+    return { code: 400, message: "Todo status is required" };
+  }
+
+  if (!body.type) {
+    return { code: 400, message: "Todo type is required" };
+  }
+
+  if (!body.ata) {
+    return { code: 400, message: "Todo ata is required" };
+  }
+
+  if (body.ata < 0) {
+    return { code: 400, message: "Todo ata is invalid" };
+  }
+
+  if (body.tags) {
+    for (let tagId of body.tags) {
+      if (!mongoose.isValidObjectId(tagId)) {
+        return { code: 400, message: "Tag Id is invalid" };
+      }
+
+      const currentTag = await tags.findById(tagId);
+      if (!currentTag) {
+        return {
+          code: 404,
+          message: `Tag not found for the given this ${tagId} Tag Id`,
+        };
+      }
+    }
+  }
+
+  let todo = await todos.find({
+    _id: new mongoose.Types.ObjectId(todoId),
+    microsoftUserId: userId,
+  });
+
+  if (!todo.length) {
+    return { code: 404, message: "Todo not found" };
+  }
+
+  let item = {
+    _id: new mongoose.Types.ObjectId(todoId),
+    microsoftUserId: userId,
+    title: Cipherer.encrypt(body.title),
+    comments: body.comments ? Cipherer.encrypt(body.comments) : undefined,
+    status: body.status,
+    type: body.type,
+    ata: body.ata,
+    tags: body.tags,
+  };
+
+  let response = await todos.findOneAndUpdate(item);
+
+  return { code: 200, message: "successful", body: response! };
+};
+
+const deleteParticularDateTodos = async (userId: string, date: string) => {
+  if (!userId) {
+    return { code: 400, message: "User Id is required" };
+  }
+
+  if (!date) {
+    return { code: 400, message: "Date is required" };
+  }
+
+  let item = {
+    microsoftUserId: userId,
+    date: date,
+    status: { $ne: "Completed" },
+  };
+
+  let result = await todos.deleteMany(item);
+  return { code: 200, message: "successful", body: result };
+};
+
+const deleteTodo = async (userId: string, todoId: string) => {
+  if (!userId) {
+    return { code: 400, message: "User Id is required" };
+  }
+
+  if (!todoId) {
+    return { code: 400, message: "Todo Id is required" };
+  }
+
+  let todo = await todos.find({
+    _id: new mongoose.Types.ObjectId(todoId),
+    microsoftUserId: userId,
+  });
+
+  if (!todo.length) {
+    return { code: 404, message: "Todo not found" };
+  }
+
+  let item = {
+    _id: todoId,
+    microsoftUserId: userId,
+    status: { $ne: "Completed" },
+  };
+
+  let result = await todos.findByIdAndDelete(
+    new mongoose.Types.ObjectId(todoId)
+  );
+
+  return { code: 200, message: "successful", body: result };
+};
+
+export {
+  getTodos,
+  createTodo,
+  updateTodo,
+  deleteParticularDateTodos,
+  deleteTodo,
+};

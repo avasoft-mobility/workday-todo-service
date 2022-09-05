@@ -1,6 +1,12 @@
 import express, { Request, Response } from "express";
 import { Rollbar } from "../helpers/Rollbar";
-import { createTodo, getTodos } from "../services/todos.service";
+import {
+  createTodo,
+  deleteParticularDateTodos,
+  deleteTodo,
+  getTodos,
+  updateTodo,
+} from "../services/todos.service";
 const router = express.Router();
 
 router.get("/", async (req: Request, res: Response) => {
@@ -22,12 +28,10 @@ router.get("/", async (req: Request, res: Response) => {
     );
 
     if (response.code === 200) {
-      return res
-        .status(response.code)
-        .json({ message: response.message, body: response.body });
+      return res.status(response.code).send(response.body);
     }
 
-    return res.status(response.code).json({ message: response.message });
+    return res.status(response.code).send({ message: response.message });
   } catch (error) {
     Rollbar.error(error as unknown as Error, req);
     res.status(500).json({ message: (error as unknown as Error).message });
@@ -43,12 +47,65 @@ router.post("/", async (req: Request, res: Response) => {
     const response = await createTodo(userId as string, body, date as string);
 
     if (response.code === 200) {
-      return res
-        .status(response.code)
-        .json({ message: response.message, body: response.body });
+      return res.status(response.code).send(response.body);
     }
 
-    return res.status(response.code).json({ message: response.message });
+    return res.status(response.code).send({ message: response.message });
+  } catch (error) {
+    Rollbar.error(error as unknown as Error, req);
+    res.status(500).json({ message: (error as unknown as Error).message });
+  }
+});
+
+router.put("/:todoId", async (req: Request, res: Response) => {
+  try {
+    const todoId = req.params.todoId;
+    const userId = req.query.userId;
+    const body = req.body;
+
+    const response = await updateTodo(todoId, userId as string, body);
+
+    if (response.code === 200) {
+      return res.status(response.code).send(response.body);
+    }
+
+    return res.status(response.code).send({ message: response.message });
+  } catch (error) {
+    Rollbar.error(error as unknown as Error, req);
+    res.status(500).json({ message: (error as unknown as Error).message });
+  }
+});
+
+router.delete("/", async (req: Request, res: Response) => {
+  try {
+    const userId = req.query.userId as string;
+    const date = req.query.date as string;
+
+    const response = await deleteParticularDateTodos(userId, date);
+
+    if (response.code === 200) {
+      return res.status(response.code).send(response.body);
+    }
+
+    return res.status(response.code).send({ message: response.message });
+  } catch (error) {
+    Rollbar.error(error as unknown as Error, req);
+    res.status(500).json({ message: (error as unknown as Error).message });
+  }
+});
+
+router.delete("/:todoId", async (req: Request, res: Response) => {
+  try {
+    const userId = req.query.userId as string;
+    const todoId = req.params.todoId as string;
+
+    const response = await deleteTodo(userId, todoId);
+
+    if (response.code === 200) {
+      return res.status(response.code).send(response.body);
+    }
+
+    return res.status(response.code).send({ message: response.message });
   } catch (error) {
     Rollbar.error(error as unknown as Error, req);
     res.status(500).json({ message: (error as unknown as Error).message });
