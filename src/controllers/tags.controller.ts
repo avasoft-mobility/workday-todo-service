@@ -7,6 +7,7 @@ import {
   createTag,
   updateTag,
   deleteTagById,
+  getTagAnalytics,
 } from "../services/tags.service";
 const router = express.Router();
 
@@ -114,6 +115,43 @@ router.put("/:tagId", async (req: Request, res: Response) => {
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, req);
     return res.status(500).send({ message: error.message });
+  }
+});
+
+router.post("/analyse", async (req: Request, res: Response) => {
+  try {
+    const tagIds: string[] = req.body.tagIds;
+    const { fromDate, toDate, userId } = req.query;
+
+    if (!fromDate || (fromDate as string).trim() === "") {
+      return res.status(400).send({ message: "from date is required" });
+    }
+
+    if (!toDate || (toDate as string).trim() === "") {
+      return res.status(400).send({ message: "to date is required" });
+    }
+
+    if (!userId) {
+      return res.status(400).send({ message: "UserId is required" });
+    }
+
+    const parsedFromDate = new Date(fromDate as string);
+    const parsedToDate = new Date(toDate as string);
+    const parsedUserId = userId.toString();
+
+    const response = await getTagAnalytics(
+      tagIds,
+      parsedFromDate,
+      parsedToDate,
+      parsedUserId
+    );
+
+    return res.status(200).send(response);
+  } catch (error) {
+    Rollbar.error(error as unknown as Error, req);
+    return res
+      .status(500)
+      .json({ message: (error as unknown as Error).message });
   }
 });
 

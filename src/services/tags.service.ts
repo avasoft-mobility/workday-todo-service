@@ -1,8 +1,11 @@
 import mongoose from "mongoose";
 import MicrosoftUser from "../models/MicrosoftUser.model";
 import Tag from "../models/tag.model";
+import TagAnalysis from "../models/tagAnalysis.model";
+import Todo from "../models/todo.model";
 import tagsSchema from "../schemas/tags.schema";
 import tags from "../schemas/tags.schema";
+import todoSchema from "../schemas/todos.schema";
 
 interface TagResponse {
   code: number;
@@ -65,7 +68,11 @@ const createTag = async (
   return { code: 201, message: "Tag created successfully", data: result };
 };
 
-const updateTag = async (tagId: string, userId: string, tagname: string): Promise<TagResponse> => {
+const updateTag = async (
+  tagId: string,
+  userId: string,
+  tagname: string
+): Promise<TagResponse> => {
   const user: MicrosoftUser = {
     _id: "string",
     userId: userId,
@@ -180,8 +187,94 @@ const deleteTagById = async (
   if (!resposne) {
     return { code: 404, message: "No tag found to delete" };
   }
-  
+
   return { code: 200, message: "Deleted successfully", body: resposne };
 };
 
-export { getTags, getTagById, createTag, deleteTagById, updateTag };
+const getTagAnalytics = async (
+  tagIds: string[],
+  fromDate: Date,
+  toDate: Date,
+  userId: string
+) => {
+  let totalEta: number = 0;
+  let totalAta: number = 0;
+  let totalTodos: number = 0;
+  let tags: TagAnalysis[] = [];
+
+  for (const tagId of tagIds) {
+    const tag = await tagsSchema.findById(tagId);
+
+    if (!tag) {
+      return { code: 400, message: "Tag with id not found" };
+    }
+
+    var query = {
+      $and: [
+        { date: { $gte: fromDate } },
+        { date: { $lte: toDate } },
+        {
+          tags: {
+            $elemMatch: { $eq: new mongoose.Types.ObjectId(tagId) },
+          },
+        },
+        {
+          microsoftUserId: {
+            $eq: userId,
+          },
+        },
+      ],
+    };
+
+    const todos: Todo[] = await todoSchema.find(query);
+
+    if (todos.length == 0) {
+      continue;
+    }
+
+    let tagAnalysis = analyseTags(tag, todos);
+    tags.push(tagAnalysis);
+  }
+
+  if (tags.length === 0) {
+    return {
+      code: 404,
+      message: "No task found with this tags on the given date interval",
+    };
+  }
+
+  tags.forEach((tag) => {
+    totalEta = totalEta + tag.totalEta;
+    totalAta = totalAta + tag.totalAta;
+    totalTodos = totalTodos + tag.totalTodos;
+  });
+
+  return { data: { tags, totalEta, totalAta, totalTodos } };
+};
+
+const analyseTags = (tag: Tag, todos: Todo[]): TagAnalysis => {
+  const totalTodos = todos.length;
+  const totalAta = todos.reduce((total: number, value: Todo) => {
+    return total + value.ata;
+  }, 0);
+  const totalEta = todos.reduce((total: number, value: Todo) => {
+    return total + value.eta;
+  }, 0);
+
+  return {
+    tag,
+    totalTodos,
+    totalAta,
+    totalEta,
+    todos,
+  };
+};
+
+export {
+  getTags,
+  getTagById,
+  createTag,
+  getTagAnalytics,
+  deleteTagById,
+  updateTag,
+};
