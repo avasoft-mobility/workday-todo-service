@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import LambdaClient from "../helpers/LambdaClient";
 import MicrosoftUser from "../models/MicrosoftUser.model";
 import Tag from "../models/tag.model";
 import TagAnalysis from "../models/tagAnalysis.model";
@@ -43,18 +44,24 @@ const getTagById = async (tagId: string): Promise<TagResponse> => {
 };
 
 const getTagsByUserId = async (userId: string): Promise<TagResponse> => {
-  const ManagerID = ["781d5e17-5dff-48da-a84f-c9420c0ed957","d12d68ea-b04f-4bd8-9124-becae7acb9b5"];
-  let queryResult: Tag[] = [];
-  let AllTeamTags : Tag[] = [];
-  var commontags = await tags.find({ microsoftUserId: { $exists: false } });
- 
-      var Teamtags = await tags.find({
-        $and: [{ microsoftUserId: { $in: ManagerID } }, { type: { $eq: "team" } }],
-      });
-console.log(Teamtags);
-  var UserTags = await tags.find({ microsoftUserId: { $eq: userId } });
+  const lambdaClient = new LambdaClient("Users");
+  const managers = (await lambdaClient.get(
+    `/users/${userId}/managers`
+  )) as MicrosoftUser[];
 
-  queryResult = [...commontags, ...Teamtags, ...UserTags];
+  console.log(managers);
+
+  const managerIds = managers.map((x) => x.userId);
+
+  let queryResult: Tag[] = [];
+  var commontags = await tags.find({ microsoftUserId: { $exists: false } });
+
+  var teamTags = await tags.find({
+    $and: [{ microsoftUserId: { $in: managerIds } }, { type: { $eq: "team" } }],
+  });
+  var userTags = await tags.find({ microsoftUserId: { $eq: userId } });
+
+  queryResult = [...commontags, ...teamTags, ...userTags];
   return queryResult.length === 0
     ? { code: 404, message: "No tags found" }
     : { message: "successful", code: 200, body: queryResult };
