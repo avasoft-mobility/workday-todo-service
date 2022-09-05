@@ -13,8 +13,17 @@ interface TagResponse {
   body?: Tag | Tag[];
 }
 
-const getTags = async (): Promise<TagResponse> => {
-  const tag = await tags.find();
+const getTags = async (userId: string): Promise<TagResponse> => {
+  if (!userId) {
+    return getAllTags();
+  }
+
+  return getTagsByUserId(userId);
+};
+
+const getAllTags = async (): Promise<TagResponse> => {
+  const tag: Tag[] = await tags.find();
+
   return !tag
     ? { code: 404, message: "No tags found" }
     : { message: "successful", code: 200, body: tag };
@@ -30,6 +39,24 @@ const getTagById = async (tagId: string): Promise<TagResponse> => {
 
   return !queryResult
     ? { code: 404, message: "No tag found" }
+    : { message: "successful", code: 200, body: queryResult };
+};
+
+const getTagsByUserId = async (userId: string): Promise<TagResponse> => {
+  const ManagerID = ["781d5e17-5dff-48da-a84f-c9420c0ed957","d12d68ea-b04f-4bd8-9124-becae7acb9b5"];
+  let queryResult: Tag[] = [];
+  let AllTeamTags : Tag[] = [];
+  var commontags = await tags.find({ microsoftUserId: { $exists: false } });
+ 
+      var Teamtags = await tags.find({
+        $and: [{ microsoftUserId: { $in: ManagerID } }, { type: { $eq: "team" } }],
+      });
+console.log(Teamtags);
+  var UserTags = await tags.find({ microsoftUserId: { $eq: userId } });
+
+  queryResult = [...commontags, ...Teamtags, ...UserTags];
+  return queryResult.length === 0
+    ? { code: 404, message: "No tags found" }
     : { message: "successful", code: 200, body: queryResult };
 };
 

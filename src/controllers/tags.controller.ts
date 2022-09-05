@@ -40,7 +40,8 @@ router.post("/", async (req: Request, res: Response) => {
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const response = await getTags();
+    const userId = req.query.userId as string;
+    const response = await getTags(userId);
 
     if (response.code === 404) {
       return res.status(response.code).send({ message: response.message });
