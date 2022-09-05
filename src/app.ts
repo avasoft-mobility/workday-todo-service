@@ -39,7 +39,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.get("/todos/check", (req, res) => {
-  return res.send({ message: "Attendance Service is working fine" });
+  return res.send({ message: "Todo Service is working fine" });
 });
 
 app.get("/todos/attendance", (req, res) => {
