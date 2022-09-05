@@ -42,9 +42,7 @@ router.get("/", async (req: Request, res: Response) => {
     const response = await getTags();
 
     if (response.code === 404) {
-      return res
-        .status(response.code)
-        .send({ message: response.message, body: response.body });
+      return res.status(response.code).send({ message: response.message });
     }
 
     return res.status(response.code).send({ body: response.body });
@@ -80,7 +78,7 @@ router.delete("/:tagId", async (req: Request, res: Response) => {
     if (response.code >= 400) {
       return res.status(response.code).send({ message: response.message });
     }
-    
+
     return res.status(response.code).send({ body: response.body });
   } catch (error) {
     Rollbar.error(error as unknown as Error, req);
