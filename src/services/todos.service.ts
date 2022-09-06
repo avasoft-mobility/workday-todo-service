@@ -7,6 +7,9 @@ import todos from "../schemas/todos.schema";
 
 import Todo from "../models/todo.model";
 import TodoCreateRequest from "../models/todoCreateRequest.model";
+import Tag from "../models/tag.model";
+
+import { getTags } from "./tags.service";
 
 interface TodoResponse {
   code: number;
@@ -74,7 +77,11 @@ const getTodosByDate = async (
     return { code: 404, message: "No records found" };
   }
 
-  const result = decrpytedData(queryResult);
+  let result = decrpytedData(queryResult);
+
+  if (date) {
+    result = await extractTagNames(userId, result);
+  }
 
   return { code: 200, message: "Successful", body: result };
 };
@@ -163,6 +170,28 @@ const decrpytedData = (queryResult: Todo[]) => {
   });
 
   return queryResult;
+};
+
+const extractTagNames = async (userId: string, todos: Todo[]) => {
+  let userTags: any = null;
+  userTags = await getTags(userId);
+
+  todos.map((todo) => {
+    if (todo.tags) {
+      return {
+        ...(todo as any)._doc,
+        ...{
+          tagNames: todo.tags.map(
+            (id) =>
+              userTags.find((tag: Tag) => tag._id!.toString() === id.toString())
+                .tagName
+          ),
+        },
+      };
+    }
+  });
+
+  return userTags;
 };
 
 const createTodo = async (
