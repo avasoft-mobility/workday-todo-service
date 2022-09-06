@@ -72,21 +72,13 @@ const createTag = async (
   tagname: string,
   tagType: string | undefined
 ) => {
-  const user: MicrosoftUser = {
-    _id: "string",
-    userId: userId,
-    name: "String",
-    role: "String",
-    practice: "string",
-    mail: "string",
-    managerId: "d12d68ea-b04f-4bd8-9124-becae7acb9b5",
-    reportings: [userId, "strung"],
-    last_access: "string",
-    __v: 0,
-    employeeId: "string",
-  };
+  const lambdaClient = new LambdaClient("Users");
+  const managers = (await lambdaClient.get(
+    `/users/${userId}/managers`
+  )) as MicrosoftUser[];
 
-  const isTagNameExist = await isTagExist(userId, user.managerId, tagname);
+  const managerIds = managers.map((x) => x.userId) as string[];
+  const isTagNameExist = await isTagExist(userId, managerIds, tagname);
 
   if (isTagNameExist) {
     return { code: 400, message: "Tag name already exist" };
@@ -107,21 +99,13 @@ const updateTag = async (
   userId: string,
   tagname: string
 ): Promise<TagResponse> => {
-  const user: MicrosoftUser = {
-    _id: "string",
-    userId: userId,
-    name: "String",
-    role: "String",
-    practice: "string",
-    mail: "string",
-    managerId: "d12d68ea-b04f-4bd8-9124-becae7acb9b5",
-    reportings: [userId, "string"],
-    last_access: "string",
-    __v: 0,
-    employeeId: "string",
-  };
+  const lambdaClient = new LambdaClient("Users");
+  const managers = (await lambdaClient.get(
+    `/users/${userId}/managers`
+  )) as MicrosoftUser[];
+  const managerIds = managers.map((x) => x.userId) as string[];
 
-  const isTagNameExist = await isTagExist(userId, user.managerId, tagname);
+  const isTagNameExist = await isTagExist(userId, managerIds, tagname);
 
   if (isTagNameExist) {
     return { code: 400, message: "Tag name already exist" };
@@ -151,7 +135,7 @@ const updateTag = async (
 
 const isTagExist = async (
   userId: string,
-  managerId: string,
+  managerIds: string[],
   tagname: string
 ): Promise<boolean> => {
   const query = {
@@ -162,8 +146,8 @@ const isTagExist = async (
       {
         $and: [
           { tagName: tagname },
-          { microsoftUserId: `${managerId}` },
-          { type: "Team" },
+          { microsoftUserId: { $in: managerIds } },
+          { type: "team" },
         ],
       },
       {

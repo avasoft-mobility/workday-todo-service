@@ -19,24 +19,6 @@ app.use(cors());
 
 require("dotenv").config();
 
-app.use(
-  "/todos/*/functions/TodosFunction/invocations",
-  (req: Request, res: Response) => {
-    const payload = JSON.parse(Buffer.from(req.body).toString());
-    (app as any).runMiddleware(
-      payload.path,
-      {
-        method: payload.httpMethod,
-        body: payload.body,
-        query: payload.queryParams,
-      },
-      function (code: any, data: any) {
-        res.json(data);
-      }
-    );
-  }
-);
-
 app.get("/", (req: Request, res: Response) => {
   return res.send("Todo service is healthy!");
 });
@@ -57,6 +39,28 @@ app.get("/todos/users", (req, res) => {
   return res.send({ message: "Users Service is working fine" });
 });
 
+app.use("/tags", TagsController);
+
+app.use("/todos", todosController);
+
+app.use(
+  "/todos/*/functions/TodosFunction/invocations",
+  (req: Request, res: Response) => {
+    const payload = JSON.parse(Buffer.from(req.body).toString());
+    (app as any).runMiddleware(
+      payload.path,
+      {
+        method: payload.httpMethod,
+        body: payload.body,
+        query: payload.queryParams,
+      },
+      function (code: any, data: any) {
+        res.json(data);
+      }
+    );
+  }
+);
+
 app.use(
   "/tags/private/common",
   (req: Request, res: Response, next: NextFunction) => {
@@ -68,10 +72,6 @@ app.use(
   },
   commonTagsController
 );
-
-app.use("/tags", TagsController);
-
-app.use("/todos", todosController);
 
 mongoose.connect(process.env.DB_STRING!.toString(), () => {
   console.log("Connected to DB");

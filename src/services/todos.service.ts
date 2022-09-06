@@ -147,7 +147,7 @@ const decrpytedData = (queryResult: Todo[]) => {
   queryResult.map((todo) => {
     const decryptedTitle = Cipherer.decrypt(todo.title);
     const decryptedComments = todo.comments
-      ? Cipherer.decrypt(todo.comments)
+      ? Cipherer.decrypt(todo.comments!)
       : undefined;
 
     if (decryptedTitle.trim() === "" && decryptedComments?.trim() === "") {
@@ -232,7 +232,7 @@ const createRecurringTodos = async (
   for (let date of dates) {
     let item = {
       title: Cipherer.encrypt(body.title),
-      comments: body.comments ? Cipherer.encrypt(body.comments) : undefined,
+      comments: body.comments ? Cipherer.encrypt(body.comments!) : undefined,
       status: body.status,
       type: body.type,
       eta: body.eta,
@@ -258,7 +258,7 @@ const createTodoByDate = async (
 
   let item = {
     title: Cipherer.encrypt(body.title),
-    comments: body.comments ? Cipherer.encrypt(body.comments) : undefined,
+    comments: body.comments ? Cipherer.encrypt(body.comments!) : undefined,
     status: body.status,
     type: body.type,
     eta: body.eta,
@@ -334,7 +334,7 @@ const updateTodo = async (
     _id: new mongoose.Types.ObjectId(todoId),
     microsoftUserId: userId,
     title: Cipherer.encrypt(body.title),
-    comments: body.comments ? Cipherer.encrypt(body.comments) : undefined,
+    comments: body.comments ? Cipherer.encrypt(body.comments!) : undefined,
     status: body.status,
     type: body.type,
     ata: body.ata,
