@@ -128,6 +128,9 @@ const getTodosByMultipleDates = async (
   const fromDate = processUTCDateConversion(startDate);
   const toDate = processUTCDateConversion(endDate);
 
+  console.log("fromDate", fromDate);
+  console.log("toDate", toDate);
+
   const multipleDatesQuery = {
     microsoftUserId: userId,
     date: { $gte: fromDate, $lt: moment(toDate).add(1).toDate() },
