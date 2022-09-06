@@ -55,7 +55,7 @@ app.use(
         query: payload.queryParams,
       },
       function (code: any, data: any) {
-        res.json(data);
+        res.status(code).json(data);
       }
     );
   }
@@ -64,11 +64,7 @@ app.use(
 app.use(
   "/tags/private/common",
   (req: Request, res: Response, next: NextFunction) => {
-    if (req.headers.key === "CF43D31C5DCD2094D72EAC3B257D5949") {
-      return next();
-    }
-
-    return res.status(403).json({ message: "No access to this API" });
+    return next();
   },
   commonTagsController
 );

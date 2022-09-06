@@ -11,12 +11,10 @@ const router = express.Router();
 router.get("/", async (req: Request, res: Response) => {
   try {
     const response = await getCommonTags();
-    return res
-      .status(response.code)
-      .json({ message: response.message, body: response.body });
+    return res.status(response.code).send(response.body);
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, req);
-    res.status(500).json({ message: error.message });
+    res.status(500).send({ message: error.message });
   }
 });
 
@@ -25,12 +23,10 @@ router.get("/:tagId", async (req: Request, res: Response) => {
 
   try {
     const response = await getCommonTags(tagId);
-    return res
-      .status(response.code)
-      .json({ message: response.message, body: response.body });
+    return res.status(response.code).send(response.body);
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, req);
-    res.status(500).json({ message: error.message });
+    res.status(500).send({ message: error.message });
   }
 });
 
@@ -39,12 +35,10 @@ router.post("/", async (req: Request, res: Response) => {
 
   try {
     const response = await createCommonTag(tagName);
-    return res
-      .status(response.code)
-      .json({ message: response.message, body: response.body });
+    return res.status(response.code).send(response.body);
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, req);
-    res.status(500).json({ message: error.message });
+    res.status(500).send({ message: error.message });
   }
 });
 
@@ -54,12 +48,10 @@ router.put("/:tagId", async (req: Request, res: Response) => {
 
   try {
     const response = await editCommonTag(tagId, tagName);
-    return res
-      .status(response.code)
-      .json({ message: response.message, body: response.body });
+    return res.status(response.code).send(response.body);
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, req);
-    res.status(500).json({ message: error.message });
+    res.status(500).send({ message: error.message });
   }
 });
 
@@ -68,12 +60,10 @@ router.delete("/:tagId", async (req: Request, res: Response) => {
 
   try {
     const response = await deleteCommonTag(tagId);
-    return res
-      .status(response.code)
-      .json({ message: response.message, body: response.body });
+    return res.status(response.code).send(response.body);
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, req);
-    res.status(500).json({ message: error.message });
+    res.status(500).send({ message: error.message });
   }
 });
 
