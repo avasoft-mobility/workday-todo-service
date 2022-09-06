@@ -1,7 +1,9 @@
+import moment from "moment";
+
 const processUTCDateConversion = (date: string) => {
   let dateQuery;
   dateQuery = new Date(date);
-  dateQuery = new Date(dateQuery.setDate(dateQuery.getDate() + 1));
+  dateQuery = moment(dateQuery).subtract(-1).toDate();
   dateQuery = new Date(dateQuery.setHours(0, 0, 0, 0));
   return dateQuery;
 };

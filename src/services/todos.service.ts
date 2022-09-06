@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import moment from "moment";
 import Cipherer from "../helpers/Cipherer";
 import processUTCDateConversion from "../helpers/Utilities";
 
@@ -129,7 +130,7 @@ const getTodosByMultipleDates = async (
 
   const multipleDatesQuery = {
     microsoftUserId: userId,
-    date: { $gte: fromDate, $lt: toDate.setDate(toDate.getDate() + 1) },
+    date: { $gte: fromDate, $lt: moment(toDate).add(1).toDate() },
   };
 
   const queryResult = await todos.find(multipleDatesQuery);
@@ -225,11 +226,7 @@ const createRecurringTodos = async (
 ): Promise<TodoResponse> => {
   const results = [];
 
-  let dates = body.recurringDates.map((date) => {
-    return processUTCDateConversion(date);
-  });
-
-  for (let date of dates) {
+  for (let date of body.recurringDates) {
     let item = {
       title: Cipherer.encrypt(body.title),
       comments: body.comments ? Cipherer.encrypt(body.comments!) : undefined,
@@ -239,7 +236,7 @@ const createRecurringTodos = async (
       tags: body.tags,
       microsoftUserId: userId,
       ata: 0,
-      date: date,
+      date: new Date(date),
     };
 
     let result = await todos.create(item);
@@ -254,8 +251,6 @@ const createTodoByDate = async (
   body: TodoCreateRequest,
   date: string
 ): Promise<TodoResponse> => {
-  const processedDate = processUTCDateConversion(date);
-
   let item = {
     title: Cipherer.encrypt(body.title),
     comments: body.comments ? Cipherer.encrypt(body.comments!) : undefined,
@@ -265,7 +260,7 @@ const createTodoByDate = async (
     ata: 0,
     tags: body.tags,
     microsoftUserId: userId,
-    date: processedDate,
+    date: new Date(date),
   };
 
   let response = await todos.create(item);
@@ -357,7 +352,7 @@ const deleteParticularDateTodos = async (userId: string, date: string) => {
 
   let item = {
     microsoftUserId: userId,
-    date: date,
+    date: new Date(date),
     status: { $ne: "Completed" },
   };
 
@@ -384,14 +379,12 @@ const deleteTodo = async (userId: string, todoId: string) => {
   }
 
   let item = {
-    _id: todoId,
+    _id: new mongoose.Types.ObjectId(todoId),
     microsoftUserId: userId,
     status: { $ne: "Completed" },
   };
 
-  let result = await todos.findByIdAndDelete(
-    new mongoose.Types.ObjectId(todoId)
-  );
+  let result = await todos.findByIdAndDelete(item);
 
   return { code: 200, message: "successful", body: result };
 };
