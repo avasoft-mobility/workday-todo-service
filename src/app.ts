@@ -58,7 +58,7 @@ app.get("/todos/users", (req, res) => {
 });
 
 app.use(
-  "/todos/private/common-tags",
+  "/tags/private/common",
   (req: Request, res: Response, next: NextFunction) => {
     if (req.headers.key === "CF43D31C5DCD2094D72EAC3B257D5949") {
       return next();
