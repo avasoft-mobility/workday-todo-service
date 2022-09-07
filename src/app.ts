@@ -15,7 +15,12 @@ const app = express();
 runMiddleware(app);
 
 app.use(json());
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 require("dotenv").config();
 

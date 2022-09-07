@@ -239,7 +239,7 @@ const createRecurringTodos = async (
       tags: body.tags,
       microsoftUserId: userId,
       ata: 0,
-      date: new Date(date),
+      date: new Date(new Date(date).setHours(0, 0, 0, 0)),
     };
 
     let result = await todos.create(item);
@@ -263,7 +263,7 @@ const createTodoByDate = async (
     ata: 0,
     tags: body.tags,
     microsoftUserId: userId,
-    date: new Date(date),
+    date: new Date(new Date(date).setHours(0, 0, 0, 0)),
   };
 
   let response = await todos.create(item);
@@ -357,7 +357,7 @@ const deleteParticularDateTodos = async (userId: string, date: string) => {
 
   let item = {
     microsoftUserId: userId,
-    date: new Date(date),
+    date: new Date(new Date(date).setHours(0, 0, 0, 0)),
     status: { $ne: "Completed" },
   };
 
