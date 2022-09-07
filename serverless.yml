@@ -19,3 +19,10 @@ functions:
           path: /todos/{proxy+}
           method: ANY
           cors: true
+      - http:
+          path: /tags
+          method: ANY
+      - http:
+          path: /tags/{proxy+}
+          method: ANY
+          cors: true

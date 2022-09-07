@@ -329,7 +329,6 @@ const updateTodo = async (
   }
 
   let item = {
-    _id: new mongoose.Types.ObjectId(todoId),
     microsoftUserId: userId,
     title: Cipherer.encrypt(body.title),
     comments: body.comments ? Cipherer.encrypt(body.comments!) : undefined,
@@ -339,7 +338,10 @@ const updateTodo = async (
     tags: body.tags,
   };
 
-  let response = await todos.findOneAndUpdate(item);
+  let response = await todos.findOneAndUpdate(
+    { _id: new mongoose.Types.ObjectId(todoId) },
+    item
+  );
 
   return { code: 200, message: "successful", body: response! };
 };
