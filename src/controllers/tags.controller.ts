@@ -41,7 +41,6 @@ router.post("/", async (req: Request, res: Response) => {
 router.get("/", async (req: Request, res: Response) => {
   try {
     const userId = req.query.userId as string;
-    console.log("same");
 
     const response = await getTags(userId);
 

@@ -7,6 +7,7 @@ import Todo from "../models/todo.model";
 import tagsSchema from "../schemas/tags.schema";
 import tags from "../schemas/tags.schema";
 import todoSchema from "../schemas/todos.schema";
+const axios = require("axios");
 
 interface TagResponse {
   code: number;
@@ -44,14 +45,17 @@ const getTagById = async (tagId: string): Promise<TagResponse> => {
 };
 
 const getTagsByUserId = async (userId: string): Promise<TagResponse> => {
-  const lambdaClient = new LambdaClient("Users");
-  const managers = (await lambdaClient.get(
-    `/users/${userId}/managers`
-  )) as MicrosoftUser[];
+  // const lambdaClient = new LambdaClient("Users");
+  // const managers = (await lambdaClient.get(
+  //   `/users/${userId}/managers`
+  // )) as MicrosoftUser[];
 
-  console.log(managers);
+  const axiosResponse = await axios.get(
+    `https://wqefm8ssja.execute-api.us-east-2.amazonaws.com/dev/users/${userId}/managers`
+  );
 
-  const managerIds = managers.map((x) => x.userId);
+  const managers = axiosResponse.data;
+  const managerIds = managers.map((x: any) => x.userId);
 
   let queryResult: Tag[] = [];
   var commontags = await tags.find({ microsoftUserId: { $exists: false } });
