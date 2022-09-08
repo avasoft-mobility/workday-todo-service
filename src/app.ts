@@ -48,8 +48,9 @@ app.use("/tags", TagsController);
 
 app.use("/todos", todosController);
 
+const functionNames = JSON.parse(process.env.LAMBDA_FUNCTION_NAMES!);
 app.use(
-  `/todos/*/functions/AVA-HIVE-NP-WORKDAY-TODOS-BE-dev-app/invocations`,
+  `/todos/*/functions/${functionNames.TODOS}/invocations`,
   (req: Request, res: Response) => {
     const payload = JSON.parse(Buffer.from(req.body).toString());
     (app as any).runMiddleware(
