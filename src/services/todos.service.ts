@@ -11,7 +11,7 @@ import TodoCreateRequest from "../models/todoCreateRequest.model";
 
 interface TodoResponse {
   code: number;
-  message: string;
+  message?: string;
   body?: Todo | Todo[];
 }
 
@@ -72,7 +72,7 @@ const getTodosByDate = async (
   });
 
   if (!queryResult.length) {
-    return { code: 404, message: "No records found" };
+    return { code: 200, body: [] };
   }
 
   const result = decrpytedData(queryResult);
@@ -112,7 +112,7 @@ const getTodosByMonth = async (
   };
   const queryResult = await todos.find(monthQuery);
   if (!queryResult.length) {
-    return { code: 404, message: "No records found" };
+    return { code: 200, body: [] };
   }
 
   const result = decrpytedData(queryResult);
@@ -139,7 +139,7 @@ const getTodosByMultipleDates = async (
   const queryResult = await todos.find(multipleDatesQuery);
 
   if (!queryResult.length) {
-    return { code: 404, message: "No records found" };
+    return { code: 200, body: [] };
   }
 
   const result = decrpytedData(queryResult);
