@@ -45,16 +45,16 @@ const getTagById = async (tagId: string): Promise<TagResponse> => {
 };
 
 const getTagsByUserId = async (userId: string): Promise<TagResponse> => {
-  // const lambdaClient = new LambdaClient("Users");
-  // const managers = (await lambdaClient.get(
-  //   `/users/${userId}/managers`
-  // )) as MicrosoftUser[];
+  const lambdaClient = new LambdaClient("Users");
+  const managers = (await lambdaClient.get(
+    `/users/${userId}/managers`
+  )) as MicrosoftUser[];
 
-  const axiosResponse = await axios.get(
-    `https://wqefm8ssja.execute-api.us-east-2.amazonaws.com/dev/users/${userId}/managers`
-  );
+  // const axiosResponse = await axios.get(
+  //   `https://wqefm8ssja.execute-api.us-east-2.amazonaws.com/dev/users/${userId}/managers`
+  // );
 
-  const managers = axiosResponse.data;
+  // const managers = axiosResponse.data;
   const managerIds = managers.map((x: any) => x.userId);
 
   let queryResult: Tag[] = [];
@@ -76,16 +76,16 @@ const createTag = async (
   tagname: string,
   tagType: string | undefined
 ) => {
-  // const lambdaClient = new LambdaClient("Users");
-  // const managers = (await lambdaClient.get(
-  //   `/users/${userId}/managers`
-  // )) as MicrosoftUser[];
+  const lambdaClient = new LambdaClient("Users");
+  const managers = (await lambdaClient.get(
+    `/users/${userId}/managers`
+  )) as MicrosoftUser[];
 
-  const axiosResponse = await axios.get(
-    `https://wqefm8ssja.execute-api.us-east-2.amazonaws.com/dev/users/${userId}/managers`
-  );
+  // const axiosResponse = await axios.get(
+  //   `https://wqefm8ssja.execute-api.us-east-2.amazonaws.com/dev/users/${userId}/managers`
+  // );
 
-  const managers = axiosResponse.data;
+  // const managers = axiosResponse.data;
   const managerIds = managers.map((x: any) => x.userId) as string[];
   const isTagNameExist = await isTagExist(userId, managerIds, tagname);
 
@@ -108,16 +108,16 @@ const updateTag = async (
   userId: string,
   tagname: string
 ): Promise<TagResponse> => {
-  // const lambdaClient = new LambdaClient("Users");
-  // const managers = (await lambdaClient.get(
-  //   `/users/${userId}/managers`
-  // )) as MicrosoftUser[];
+  const lambdaClient = new LambdaClient("Users");
+  const managers = (await lambdaClient.get(
+    `/users/${userId}/managers`
+  )) as MicrosoftUser[];
 
-  const axiosResponse = await axios.get(
-    `https://wqefm8ssja.execute-api.us-east-2.amazonaws.com/dev/users/${userId}/managers`
-  );
+  // const axiosResponse = await axios.get(
+  //   `https://wqefm8ssja.execute-api.us-east-2.amazonaws.com/dev/users/${userId}/managers`
+  // );
 
-  const managers = axiosResponse.data;
+  // const managers = axiosResponse.data;
   const managerIds = managers.map((x: any) => x.userId) as string[];
 
   const isTagNameExist = await isTagExist(userId, managerIds, tagname);
