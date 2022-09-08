@@ -49,7 +49,7 @@ app.use("/tags", TagsController);
 app.use("/todos", todosController);
 
 app.use(
-  "/todos/*/functions/TodosFunction/invocations",
+  `/todos/*/functions/AVA-HIVE-NP-WORKDAY-TODOS-BE-dev-app/invocations`,
   (req: Request, res: Response) => {
     const payload = JSON.parse(Buffer.from(req.body).toString());
     (app as any).runMiddleware(
