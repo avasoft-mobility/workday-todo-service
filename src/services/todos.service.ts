@@ -331,7 +331,7 @@ const createRecurringTodos = async (
   for (let date of body.recurringDates) {
     let item = {
       title: body.title,
-      comments: body.comments ? body.comments : undefined,
+      comments: body.comments,
       status: body.status,
       type: body.type,
       eta: body.eta,
@@ -355,7 +355,7 @@ const createTodoByDate = async (
 ): Promise<TodoResponse> => {
   let item = {
     title: body.title,
-    comments: body.comments ? body.comments : undefined,
+    comments: body.comments,
     status: body.status,
     type: body.type,
     eta: body.eta,
@@ -433,7 +433,7 @@ const updateTodo = async (
   let item = {
     microsoftUserId: userId,
     title: body.title,
-    comments: body.comments ? body.comments : undefined,
+    comments: body.comments,
     status: body.status,
     type: body.type,
     ata: body.ata,
