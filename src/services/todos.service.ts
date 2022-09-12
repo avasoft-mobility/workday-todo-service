@@ -170,9 +170,7 @@ const getTodosByDate = async (
     return { code: 200, body: [] };
   }
 
-  const result = decrpytedData(queryResult);
-
-  return { code: 200, message: "Successful", body: result };
+  return { code: 200, message: "Successful", body: queryResult };
 };
 
 const getTodosByMonth = async (
@@ -225,9 +223,7 @@ const getTodosByMonth = async (
     return { code: 200, body: [] };
   }
 
-  const result = decrpytedData(queryResult);
-
-  return { code: 200, message: "Successfull", body: result };
+  return { code: 200, message: "Successfull", body: queryResult };
 };
 
 const getTodosByMultipleDates = async (
@@ -252,31 +248,7 @@ const getTodosByMultipleDates = async (
     return { code: 200, body: [] };
   }
 
-  const result = decrpytedData(queryResult);
-
-  return { code: 200, message: "Successfull", body: result };
-};
-
-const decrpytedData = (queryResult: Todo[]) => {
-  queryResult.map((todo) => {
-    const decryptedTitle = Cipherer.decrypt(todo.title);
-    const decryptedComments = todo.comments
-      ? Cipherer.decrypt(todo.comments!)
-      : undefined;
-
-    if (decryptedTitle.trim() === "" && decryptedComments?.trim() === "") {
-      return todo;
-    }
-
-    todo.title = decryptedTitle;
-    if (decryptedComments) {
-      todo.comments = decryptedComments;
-    }
-
-    return todo;
-  });
-
-  return queryResult;
+  return { code: 200, message: "Successfull", body: queryResult };
 };
 
 const getMultiUserTodosByDate = async (
@@ -358,8 +330,8 @@ const createRecurringTodos = async (
 
   for (let date of body.recurringDates) {
     let item = {
-      title: Cipherer.encrypt(body.title),
-      comments: body.comments ? Cipherer.encrypt(body.comments!) : undefined,
+      title: body.title,
+      comments: body.comments ? body.comments! : undefined,
       status: body.status,
       type: body.type,
       eta: body.eta,
@@ -382,8 +354,8 @@ const createTodoByDate = async (
   date: string
 ): Promise<TodoResponse> => {
   let item = {
-    title: Cipherer.encrypt(body.title),
-    comments: body.comments ? Cipherer.encrypt(body.comments!) : undefined,
+    title: body.title,
+    comments: body.comments ? body.comments! : undefined,
     status: body.status,
     type: body.type,
     eta: body.eta,
@@ -460,8 +432,8 @@ const updateTodo = async (
 
   let item = {
     microsoftUserId: userId,
-    title: Cipherer.encrypt(body.title),
-    comments: body.comments ? Cipherer.encrypt(body.comments!) : undefined,
+    title: body.title,
+    comments: body.comments ? body.comments! : undefined,
     status: body.status,
     type: body.type,
     ata: body.ata,
