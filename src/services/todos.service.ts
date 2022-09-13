@@ -6,6 +6,7 @@ import tags from "../schemas/tags.schema";
 import todos from "../schemas/todos.schema";
 
 import Todo from "../models/todo.model";
+import TodoStats from "../models/todo-stats.model";
 import TodoCreateRequest from "../models/todoCreateRequest.model";
 import HiveTodo from "../models/hive-todo.model";
 import Tag from "../models/tag.model";
@@ -63,6 +64,52 @@ const getTodos = async (
     endDate
   );
   return todoByMultipleDates;
+};
+
+const getTodosForStats = async (
+  userId: string,
+  interestedDate: string,
+  startDate: string,
+  endDate: string,
+  reportings: string[]
+): Promise<ServiceResponse<TodoStats>> => {
+  if (!userId) {
+    return { code: 400, message: "User Id is required" };
+  }
+
+  if (!interestedDate) {
+    return { code: 400, message: "Interested Date is required" };
+  }
+
+  if (!startDate) {
+    return { code: 400, message: "Start Date is required" };
+  }
+
+  if (!endDate) {
+    return { code: 400, message: "End Date is required" };
+  }
+
+  const interestedDateTodo = (await getTodosByDate(userId, interestedDate))
+    .body as Todo[];
+
+  const dateIntervelTodos = (
+    await getTodosByMultipleDates(userId, startDate, endDate)
+  ).body as Todo[];
+
+  const reportingsDateIntervalTodos = await getMultiUserDateIntervalTodos(
+    startDate,
+    endDate,
+    reportings
+  );
+
+  return {
+    code: 200,
+    body: {
+      dateIntervalTodos: dateIntervelTodos,
+      interestedDateTodo: interestedDateTodo,
+      reportingsDateIntervalTodos: reportingsDateIntervalTodos,
+    },
+  };
 };
 
 const getHiveTodos = async (
@@ -231,6 +278,23 @@ const decrpytedData = (queryResult: Todo[]) => {
   });
 
   return queryResult;
+};
+
+const getMultiUserDateIntervalTodos = async (
+  startDate: string,
+  endDate: string,
+  users: string[]
+): Promise<Todo[]> => {
+  const fromDate = processUTCDateConversion(startDate);
+  const toDate = processUTCDateConversion(endDate);
+
+  const query = {
+    microsoftUserId: { $in: users },
+    date: { $gte: fromDate, $lt: moment(toDate).add(1).toDate() },
+  };
+
+  const result = (await todos.find(query)) as Todo[];
+  return result;
 };
 
 const createTodo = async (
@@ -467,5 +531,6 @@ export {
   updateTodo,
   deleteParticularDateTodos,
   deleteTodo,
+  getTodosForStats,
   getHiveTodos,
 };
