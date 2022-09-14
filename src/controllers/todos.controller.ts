@@ -6,6 +6,7 @@ import {
   deleteTodo,
   getTodos,
   updateTodo,
+  getHiveTodos,
 } from "../services/todos.service";
 const router = express.Router();
 
@@ -26,6 +27,24 @@ router.get("/", async (req: Request, res: Response) => {
       startDate as string,
       endDate as string
     );
+
+    if (response.code === 200) {
+      return res.status(response.code).send(response.body);
+    }
+
+    return res.status(response.code).send({ message: response.message });
+  } catch (error) {
+    Rollbar.error(error as unknown as Error, req);
+    res.status(500).json({ message: (error as unknown as Error).message });
+  }
+});
+
+router.get("/hive", async (req: Request, res: Response) => {
+  try {
+    const userId = req.query.userId;
+    const date = req.query.date;
+
+    const response = await getHiveTodos(userId as string, date as string);
 
     if (response.code === 200) {
       return res.status(response.code).send(response.body);

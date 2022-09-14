@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import moment from "moment";
-import Cipherer from "../helpers/Cipherer";
 import processUTCDateConversion from "../helpers/Utilities";
 
 import tags from "../schemas/tags.schema";
@@ -8,6 +7,11 @@ import todos from "../schemas/todos.schema";
 
 import Todo from "../models/todo.model";
 import TodoCreateRequest from "../models/todoCreateRequest.model";
+import HiveTodo from "../models/hive-todo.model";
+import Tag from "../models/tag.model";
+import { getCommonTags } from "./commonTags.service";
+import ServiceResponse from "../models/Service-response.model";
+import Cipherer from "../helpers/Cipherer";
 
 interface TodoResponse {
   code: number;
@@ -59,6 +63,51 @@ const getTodos = async (
     endDate
   );
   return todoByMultipleDates;
+};
+
+const getHiveTodos = async (
+  userId: string,
+  date: string
+): Promise<ServiceResponse<HiveTodo[]>> => {
+  if (!userId) {
+    return { code: 400, message: "User Id is required" };
+  }
+
+  if (!date) {
+    return { code: 400, message: "Date is required" };
+  }
+
+  const defaultTags = (await getCommonTags()).body! as Tag[];
+  const todos = (await getTodosByDate(userId, date)).body! as Todo[];
+
+  const hiveTodos = todos.map((todo) => {
+    return {
+      user_id: todo.microsoftUserId,
+      work_item: todo.title,
+      estimated_hours: todo.eta,
+      actual_hours: todo.ata,
+      due_date: moment(todo.date).format("YYYY-MM-DD"),
+      status: todo.status,
+      tags: fetchTodoDefaultTags(todo.tags ? todo.tags : [], defaultTags),
+    } as HiveTodo;
+  });
+
+  return { code: 200, body: hiveTodos };
+};
+
+const fetchTodoDefaultTags = (tags: Tag[], defaultTags: Tag[]): string[] => {
+  let result: string[] = [];
+  for (let tag of tags) {
+    const defaultTag = defaultTags.find(
+      (x) => x._id?.toString() === tag._id!.toString()
+    );
+    if (!defaultTag) {
+      continue;
+    }
+    result.push(defaultTag.tagName);
+  }
+
+  return result;
 };
 
 const getTodosByDate = async (
@@ -418,4 +467,5 @@ export {
   updateTodo,
   deleteParticularDateTodos,
   deleteTodo,
+  getHiveTodos,
 };
