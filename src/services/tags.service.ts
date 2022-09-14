@@ -108,6 +108,18 @@ const updateTag = async (
   userId: string,
   tagname: string
 ): Promise<TagResponse> => {
+  const existingTag = await tags
+    .where("_id")
+    .equals(new mongoose.Types.ObjectId(tagId));
+
+  if (!existingTag) {
+    return { code: 404, message: "Cannot find a tag with this tag id" };
+  }
+
+  if (existingTag[0].tagName === tagname) {
+    return { body: existingTag[0], code: 200, message: "Updated successfully" };
+  }
+
   const lambdaClient = new LambdaClient("Users");
   const managers = (await lambdaClient.get(
     `/users/${userId}/managers`
@@ -145,7 +157,7 @@ const updateTag = async (
     .where("_id")
     .equals(new mongoose.Types.ObjectId(tagId));
 
-  return { body: updateTag, code: 200, message: "Updated successfully" };
+  return { body: updateTag[0], code: 200, message: "Updated successfully" };
 };
 
 const isTagExist = async (
