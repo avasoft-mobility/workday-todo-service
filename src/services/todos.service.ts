@@ -11,7 +11,7 @@ import TodoCreateRequest from "../models/todoCreateRequest.model";
 import HiveTodo from "../models/hive-todo.model";
 import Tag from "../models/tag.model";
 import { getCommonTags } from "./commonTags.service";
-import ServiceResponse from "../models/Service-response.model";
+import ServiceResponse from "../models/service-response.model";
 import Cipherer from "../helpers/Cipherer";
 
 interface TodoResponse {
@@ -96,9 +96,8 @@ const getTodosForStats = async (
     await getTodosByMultipleDates(userId, startDate, endDate)
   ).body as Todo[];
 
-  const reportingsDateIntervalTodos = await getMultiUserDateIntervalTodos(
-    startDate,
-    endDate,
+  const reportingsInterestedDateTodos = await getMultiUserTodosByDate(
+    interestedDate,
     reportings
   );
 
@@ -107,7 +106,7 @@ const getTodosForStats = async (
     body: {
       dateIntervalTodos: dateIntervelTodos,
       interestedDateTodo: interestedDateTodo,
-      reportingsDateIntervalTodos: reportingsDateIntervalTodos,
+      reportingsInterestedDateTodos: reportingsInterestedDateTodos,
     },
   };
 };
@@ -280,21 +279,21 @@ const decrpytedData = (queryResult: Todo[]) => {
   return queryResult;
 };
 
-const getMultiUserDateIntervalTodos = async (
-  startDate: string,
-  endDate: string,
+const getMultiUserTodosByDate = async (
+  date: string,
   users: string[]
 ): Promise<Todo[]> => {
-  const fromDate = processUTCDateConversion(startDate);
-  const toDate = processUTCDateConversion(endDate);
-
-  const query = {
+  const processedDate = processUTCDateConversion(date);
+  const queryResult = await todos.find({
     microsoftUserId: { $in: users },
-    date: { $gte: fromDate, $lt: moment(toDate).add(1).toDate() },
-  };
+    date: processedDate,
+  });
 
-  const result = (await todos.find(query)) as Todo[];
-  return result;
+  if (!queryResult.length) {
+    return [];
+  }
+
+  return queryResult;
 };
 
 const createTodo = async (

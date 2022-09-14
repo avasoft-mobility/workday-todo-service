@@ -3,7 +3,7 @@ import Todo from "./todo.model";
 interface TodoStats {
   interestedDateTodo: Todo[];
   dateIntervalTodos: Todo[];
-  reportingsDateIntervalTodos: Todo[];
+  reportingsInterestedDateTodos: Todo[];
 }
 
 export default TodoStats;
