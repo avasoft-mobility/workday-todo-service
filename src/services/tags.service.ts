@@ -290,7 +290,7 @@ const getTagAnalytics = async (
   totalAta = analysedMultipleTags.totalAta;
   totalTodos = analysedMultipleTags.totalTodos;
 
-  return { data: { tags, totalEta, totalAta, totalTodos } };
+  return { tags, totalEta, totalAta, totalTodos };
 };
 
 const analyseSingleTag = (tag: Tag, todos: Todo[]): TagAnalysis => {
