@@ -416,6 +416,7 @@ const updateTodo = async (
     type: body.type,
     ata: body.ata,
     tags: body.tags,
+    date: body.date ? new Date(body.date) : body.date,
   };
 
   let response = await todos.findOneAndUpdate(

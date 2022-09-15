@@ -7,6 +7,7 @@ interface TodoCreateRequest {
   ata: number;
   tags: string[];
   recurringDates: string[];
+  date?: string;
 }
 
 export default TodoCreateRequest;
