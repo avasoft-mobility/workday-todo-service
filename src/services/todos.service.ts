@@ -177,45 +177,24 @@ const getTodosByMonth = async (
   month: string,
   year: string
 ): Promise<TodoResponse> => {
-  let monthQuery = {
-    $expr: {
-      $and: [
-        {
-          $eq: [
-            {
-              $month: "$date",
-            },
-            month,
-          ],
-        },
-        {
-          $eq: [
-            {
-              $year: "$date",
-            },
-            year,
-          ],
-        },
-        {
-          $eq: ["$microsoftUserId", userId],
-        },
-      ],
+  const startOfMonth = moment(new Date(parseInt(year), parseInt(month) - 1, 1))
+    .startOf("month")
+    .add("-3", "seconds")
+    .toDate();
+  const endOfMonth = moment(new Date(parseInt(year), parseInt(month) - 1, 1))
+    .endOf("month")
+    .add("3", "seconds")
+    .toDate();
+
+  console.log("startOfMonth", startOfMonth);
+  console.log("endOfMonth", endOfMonth);
+
+  let queryResult = await todos.find({
+    date: {
+      $gte: startOfMonth,
+      $lte: endOfMonth,
     },
-  };
-  let queryResult = await todos.find(monthQuery);
-
-  const firstDateTodos = await todos.find({
     microsoftUserId: userId,
-    date: new Date(parseInt(year), parseInt(month), 1),
-  });
-  queryResult = queryResult.concat(firstDateTodos);
-
-  const lastDate = new Date(parseInt(year), parseInt(month) + 1, 1, 0);
-  queryResult = queryResult.filter((todo) => {
-    return (
-      new Date(todo.date.setHours(0, 0, 0, 0)).toDateString() !==
-      new Date(lastDate.setHours(0, 0, 0, 0)).toDateString()
-    );
   });
 
   if (!queryResult.length) {
