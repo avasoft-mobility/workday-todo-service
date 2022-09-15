@@ -11,8 +11,7 @@ import TodoCreateRequest from "../models/todoCreateRequest.model";
 import HiveTodo from "../models/hive-todo.model";
 import Tag from "../models/tag.model";
 import { getCommonTags } from "./commonTags.service";
-import ServiceResponse from "../models/service-response.model";
-import Cipherer from "../helpers/Cipherer";
+import ServiceResponse from "../models/ServiceResponse.model";
 
 interface TodoResponse {
   code: number;
