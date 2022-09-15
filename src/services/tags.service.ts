@@ -247,39 +247,37 @@ const getTagAnalytics = async (
   let totalTodos: number = 0;
   let tags: TagAnalysis[] = [];
 
-  for (const tagId of tagIds) {
-    const tag = await tagsSchema.findById(tagId);
+  const totalTags = await tagsSchema.find({ _id: { $in: tagIds } });
 
-    if (!tag) {
-      return { code: 400, message: "Tag with id not found" };
-    }
-
-    var query = {
-      $and: [
-        { date: { $gte: fromDate } },
-        { date: { $lte: toDate } },
-        {
-          tags: {
-            $elemMatch: { $eq: new mongoose.Types.ObjectId(tagId) },
-          },
-        },
-        {
-          microsoftUserId: {
-            $eq: userId,
-          },
-        },
-      ],
-    };
-
-    const todos: Todo[] = await todoSchema.find(query);
-
-    if (todos.length == 0) {
-      continue;
-    }
-
-    let tagAnalysis = analyseTags(tag, todos);
-    tags.push(tagAnalysis);
+  if (totalTags.length !== tagIds.length) {
+    return { code: 400, message: "Some of the given tag id is not found" };
   }
+
+  var query = {
+    $and: [
+      { date: { $gte: fromDate } },
+      { date: { $lte: toDate } },
+      {
+        tags: {
+          $in: tagIds,
+        },
+      },
+      {
+        microsoftUserId: {
+          $eq: userId,
+        },
+      },
+    ],
+  };
+
+  const todos: Todo[] = await todoSchema.find(query);
+
+  for (const tag of totalTags) {
+    let response = analyseSingleTag(tag, todos);
+    tags.push(response);
+  }
+
+  const analysedMultipleTags = analyseMultipleTags(todos);
 
   if (tags.length === 0) {
     return {
@@ -288,16 +286,38 @@ const getTagAnalytics = async (
     };
   }
 
-  tags.forEach((tag) => {
-    totalEta = totalEta + tag.totalEta;
-    totalAta = totalAta + tag.totalAta;
-    totalTodos = totalTodos + tag.totalTodos;
-  });
+  totalEta = analysedMultipleTags.totalEta;
+  totalAta = analysedMultipleTags.totalAta;
+  totalTodos = analysedMultipleTags.totalTodos;
 
   return { data: { tags, totalEta, totalAta, totalTodos } };
 };
 
-const analyseTags = (tag: Tag, todos: Todo[]): TagAnalysis => {
+const analyseSingleTag = (tag: Tag, todos: Todo[]): TagAnalysis => {
+  const filteredTodos = todos.filter((todo: Todo) => {
+    return todo.tags?.some((x: Tag) => {
+      return x.toString() === tag._id.toString();
+    });
+  });
+
+  const totalTodos = filteredTodos.length;
+  const totalAta = filteredTodos.reduce((total: number, value: Todo) => {
+    return total + value.ata;
+  }, 0);
+  const totalEta = filteredTodos.reduce((total: number, value: Todo) => {
+    return total + value.eta;
+  }, 0);
+
+  return {
+    tag,
+    totalTodos,
+    totalAta,
+    totalEta,
+    todos,
+  };
+};
+
+const analyseMultipleTags = (todos: Todo[]) => {
   const totalTodos = todos.length;
   const totalAta = todos.reduce((total: number, value: Todo) => {
     return total + value.ata;
@@ -307,7 +327,6 @@ const analyseTags = (tag: Tag, todos: Todo[]): TagAnalysis => {
   }, 0);
 
   return {
-    tag,
     totalTodos,
     totalAta,
     totalEta,

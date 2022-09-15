@@ -123,29 +123,30 @@ router.put("/:tagId", async (req: Request, res: Response) => {
 router.post("/analyse", async (req: Request, res: Response) => {
   try {
     const tagIds: string[] = req.body.tagIds;
-    const { fromDate, toDate, userId } = req.query;
+    const fromDate = req.query.fromDate as string;
+    const toDate = req.query.toDate as string;
+    const userId = req.query.userId as string;
 
     if (!fromDate || (fromDate as string).trim() === "") {
-      return res.status(400).send({ message: "from date is required" });
+      return res.status(400).send({ message: "From date is required" });
     }
 
     if (!toDate || (toDate as string).trim() === "") {
-      return res.status(400).send({ message: "to date is required" });
+      return res.status(400).send({ message: "To date is required" });
     }
 
     if (!userId) {
       return res.status(400).send({ message: "UserId is required" });
     }
 
-    const parsedFromDate = new Date(fromDate as string);
-    const parsedToDate = new Date(toDate as string);
-    const parsedUserId = userId.toString();
+    const parsedFromDate = new Date(new Date(fromDate).setHours(0, 0, 0, 0));
+    const parsedToDate = new Date(new Date(toDate).setHours(0, 0, 0, 0));
 
     const response = await getTagAnalytics(
       tagIds,
       parsedFromDate,
       parsedToDate,
-      parsedUserId
+      userId
     );
 
     return res.status(200).send(response);
