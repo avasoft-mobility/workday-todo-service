@@ -1,6 +1,6 @@
 interface ServiceResponse<T> {
-  code: number;
   message?: string;
+  code: number;
   body?: T;
 }
 
