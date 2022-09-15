@@ -123,7 +123,11 @@ router.put("/:tagId", async (req: Request, res: Response) => {
 router.post("/analyse", async (req: Request, res: Response) => {
   try {
     const tagIds: string[] = req.body.tagIds;
-    const { fromDate, toDate, userId } = JSON.parse(JSON.stringify(req.query));
+    const { fromDate, toDate, userId } = req.query as {
+      fromDate: string;
+      toDate: string;
+      userId: string;
+    };
 
     if (!fromDate || (fromDate as string).trim() === "") {
       return res.status(400).send({ message: "From date is required" });
