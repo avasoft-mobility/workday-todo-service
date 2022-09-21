@@ -372,14 +372,11 @@ const updateTodo = async (
     return { code: 400, message: "Todo type is required" };
   }
 
-  if (!body.ata && (body.status === "Completed" || body.status === "On Hold")) {
+  if (!body.ata && body.status === "Completed") {
     return { code: 400, message: "Todo ata is required" };
   }
 
-  if (
-    body.ata < 0 &&
-    (body.status === "Completed" || body.status === "On Hold")
-  ) {
+  if (body.ata < 0 && body.status === "Completed") {
     return { code: 400, message: "Todo ata is invalid" };
   }
 
