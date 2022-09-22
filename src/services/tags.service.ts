@@ -50,20 +50,24 @@ const getTagsByUserId = async (userId: string): Promise<TagResponse> => {
     `/users/${userId}/managers`
   )) as MicrosoftUser[];
 
-  // const axiosResponse = await axios.get(
-  //   `https://wqefm8ssja.execute-api.us-east-2.amazonaws.com/dev/users/${userId}/managers`
-  // );
-
-  // const managers = axiosResponse.data;
   const managerIds = managers.map((x: any) => x.userId);
 
   let queryResult: Tag[] = [];
   var commontags = await tags.find({ microsoftUserId: { $exists: false } });
+  commontags = commontags.map((x) => {
+    x.type = "default";
+    return x;
+  });
 
   var teamTags = await tags.find({
     $and: [{ microsoftUserId: { $in: managerIds } }, { type: { $eq: "team" } }],
   });
+
   var userTags = await tags.find({ microsoftUserId: { $eq: userId } });
+  userTags = userTags.map((x) => {
+    x.type = "user";
+    return x;
+  });
 
   queryResult = [...commontags, ...teamTags, ...userTags];
   return queryResult.length === 0
