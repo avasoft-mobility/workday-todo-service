@@ -54,20 +54,25 @@ const getTagsByUserId = async (userId: string): Promise<TagResponse> => {
 
   let queryResult: Tag[] = [];
   var commontags = await tags.find({ microsoftUserId: { $exists: false } });
-  commontags = commontags.map((x) => {
-    x.type = "default";
-    return x;
-  });
+  if (commontags) {
+    commontags = commontags.map((x) => {
+      x.type = "default";
+      return x;
+    });
+  }
 
   var teamTags = await tags.find({
     $and: [{ microsoftUserId: { $in: managerIds } }, { type: { $eq: "team" } }],
   });
 
   var userTags = await tags.find({ microsoftUserId: { $eq: userId } });
-  userTags = userTags.map((x) => {
-    x.type = "user";
-    return x;
-  });
+
+  if (userTags) {
+    userTags = userTags.map((x) => {
+      x.type = "user";
+      return x;
+    });
+  }
 
   queryResult = [...commontags, ...teamTags, ...userTags];
   return queryResult.length === 0
