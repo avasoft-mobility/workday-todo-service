@@ -75,6 +75,7 @@ const getTagsByUserId = async (userId: string): Promise<TagResponse> => {
   }
 
   queryResult = [...commontags, ...teamTags, ...userTags];
+
   return queryResult.length === 0
     ? { code: 404, message: "No tags found" }
     : { message: "successful", code: 200, body: queryResult };

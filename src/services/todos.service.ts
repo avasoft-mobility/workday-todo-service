@@ -12,6 +12,7 @@ import HiveTodo from "../models/hive-todo.model";
 import Tag from "../models/tag.model";
 import { getCommonTags } from "./commonTags.service";
 import ServiceResponse from "../models/ServiceResponse.model";
+import { getTags } from "./tags.service";
 
 interface TodoResponse {
   code: number;
@@ -160,7 +161,7 @@ const getTodosByDate = async (
   date: string
 ): Promise<TodoResponse> => {
   const processedDate = processUTCDateConversion(date);
-  const queryResult = await todos.find({
+  let queryResult = await todos.find({
     microsoftUserId: userId,
     date: processedDate,
   });
@@ -168,6 +169,25 @@ const getTodosByDate = async (
   if (!queryResult.length) {
     return { code: 200, body: [] };
   }
+
+  const userTags = await getTags(userId);
+
+  if (userTags.code !== 200) {
+    return { code: 200, message: "Successful", body: queryResult };
+  }
+
+  queryResult = queryResult.map((todo) => {
+    if (todo.tags) {
+      todo.tags = todo.tags.map(
+        (id) =>
+          (userTags.body! as Tag[]).find(
+            (tag: Tag) => tag._id!.toString() === id.toString()
+          )!
+      );
+      return todo;
+    }
+    return todo;
+  });
 
   return { code: 200, message: "Successful", body: queryResult };
 };
