@@ -1,4 +1,4 @@
-service: AVA-HIVE-NP-WORKDAY-TODOS-BE
+service: AVA-HIVE-PROD-TODO
 provider:
   name: aws
   runtime: nodejs16.x
