@@ -26,14 +26,15 @@ const getTodos = async (
   month: string,
   year: string,
   startDate: string,
-  endDate: string
+  endDate: string,
+  object: string
 ): Promise<TodoResponse> => {
   if (!userId) {
     return { code: 400, message: "User Id is required" };
   }
 
   if (date) {
-    const todosByDate = await getTodosByDate(userId, date);
+    const todosByDate = await getTodosByDate(userId, date, object);
     return todosByDate;
   }
 
@@ -158,7 +159,8 @@ const fetchTodoDefaultTags = (tags: Tag[], defaultTags: Tag[]): string[] => {
 
 const getTodosByDate = async (
   userId: string,
-  date: string
+  date: string,
+  object?: string
 ): Promise<TodoResponse> => {
   const processedDate = processUTCDateConversion(date);
   let queryResult = await todos.find({
@@ -176,18 +178,22 @@ const getTodosByDate = async (
     return { code: 200, message: "Successful", body: queryResult };
   }
 
-  queryResult = queryResult.map((todo) => {
-    if (todo.tags) {
-      todo.tags = todo.tags.map(
-        (id) =>
-          (userTags.body! as Tag[]).find(
-            (tag: Tag) => tag._id!.toString() === id.toString()
-          )!
-      );
+  if (object !== undefined && object === "true") {
+    queryResult = queryResult.map((todo) => {
+      if (todo.tags) {
+        todo.tags = todo.tags.map(
+          (id) =>
+            (userTags.body! as Tag[]).find(
+              (tag: Tag) => tag._id!.toString() === id.toString()
+            )!
+        );
+        return todo;
+      }
       return todo;
-    }
-    return todo;
-  });
+    });
+
+    return { code: 200, message: "Successful", body: queryResult };
+  }
 
   return { code: 200, message: "Successful", body: queryResult };
 };
