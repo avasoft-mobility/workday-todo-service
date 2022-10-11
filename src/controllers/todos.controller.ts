@@ -19,6 +19,7 @@ router.get("/", async (req: Request, res: Response) => {
     const year = req.query.year;
     const startDate = req.query.startDate;
     const endDate = req.query.endDate;
+    const object = req.query.object;
 
     const response = await getTodos(
       userId as string,
@@ -26,7 +27,8 @@ router.get("/", async (req: Request, res: Response) => {
       month as string,
       year as string,
       startDate as string,
-      endDate as string
+      endDate as string,
+      object as string
     );
 
     if (response.code === 200) {
