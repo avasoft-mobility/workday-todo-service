@@ -205,11 +205,9 @@ const getTodosByMonth = async (
 ): Promise<TodoResponse> => {
   const startOfMonth = moment(new Date(parseInt(year), parseInt(month) - 1, 1))
     .startOf("month")
-    .add("-3", "seconds")
     .toDate();
   const endOfMonth = moment(new Date(parseInt(year), parseInt(month) - 1, 1))
     .endOf("month")
-    .add("3", "seconds")
     .toDate();
 
   console.log("startOfMonth", startOfMonth);
