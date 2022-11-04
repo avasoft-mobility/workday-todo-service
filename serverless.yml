@@ -1,16 +1,22 @@
-service: AVA-HIVE-PROD-TODO
+service: AVA-HIVE-PROD-TODO-LAMBDA
 provider:
+  deploymentBucket:
+    name: ava-hive-prod-cfbucket-s3
+    serverSideEncryption: AES256
   name: aws
+  apiName: AVA-HIVE-PROD-TODO
   runtime: nodejs16.x
   stage: prod
   region: ap-south-1
-  memorySize: 128
+  memorySize: 512
   apiGateway:
-    restApiId: xrdeyndm7e
-    restApiRootResourceId: q3j6pmzvm0
+    restApiId: ka3iuykv3d
+    restApiRootResourceId: 2oykb18v30
 functions:
   app:
     handler: src/app.lambdaHandler
+    name: AVA-HIVE-PROD-TODO-LAMBDA
+    timeout: 30
     events:
       - http:
           path: /todos
