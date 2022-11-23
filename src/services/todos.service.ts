@@ -67,6 +67,18 @@ const getTodos = async (
   return todoByMultipleDates;
 };
 
+const getMultipleUsersTodos = async (
+  userIds: string[],
+  date: string
+): Promise<TodoResponse> => {
+  if (!userIds || (userIds as string[]).length === 0) {
+    return { code: 400, message: "Atleat one user Id is required" };
+  }
+
+  const todosByDate = await getMultiUserTodosByDate(date, userIds);
+  return { code: 200, body: todosByDate };
+};
+
 const getTodosForStats = async (
   userId: string,
   interestedDate: string,
@@ -504,4 +516,5 @@ export {
   deleteTodo,
   getTodosForStats,
   getHiveTodos,
+  getMultipleUsersTodos,
 };

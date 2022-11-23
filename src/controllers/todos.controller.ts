@@ -8,6 +8,7 @@ import {
   getTodosForStats,
   updateTodo,
   getHiveTodos,
+  getMultipleUsersTodos,
 } from "../services/todos.service";
 const router = express.Router();
 
@@ -73,6 +74,27 @@ router.post("/", async (req: Request, res: Response) => {
     }
 
     return res.status(response.code).send({ message: response.message });
+  } catch (error) {
+    Rollbar.error(error as unknown as Error, req);
+    res.status(500).json({ message: (error as unknown as Error).message });
+  }
+});
+
+router.post("/multiple_users_todos", async (req: Request, res: Response) => {
+  try {
+    const userIds = req.body.userIds;
+    const date = req.query.date;
+
+    const response = await getMultipleUsersTodos(
+      userIds as string[],
+      date as string
+    );
+
+    if (response.code !== 200) {
+      return res.status(response.code).send({ message: response.message });
+    }
+
+    return res.status(response.code).send(response.body);
   } catch (error) {
     Rollbar.error(error as unknown as Error, req);
     res.status(500).json({ message: (error as unknown as Error).message });
