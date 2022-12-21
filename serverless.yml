@@ -6,7 +6,7 @@ provider:
   region: us-east-2
   memorySize: 128
   apiGateway:
-    restApiId: wqefm8ssja
+    restApiId: cvj8t44lad
     restApiRootResourceId: fp8vr4aezh
 functions:
   app:
